@@ -8,14 +8,14 @@ import pygame as pg
 from pygame.sprite import AbstractGroup
 
 
-WIDTH = 1600  # ゲームウィンドウの幅
-HEIGHT = 900  # ゲームウィンドウの高さ
+WIDTH = 1200  # ゲームウィンドウの幅
+HEIGHT = 600  # ゲームウィンドウの高さ
 
 
 def check_bound(obj: pg.Rect) -> tuple[bool, bool]:
     """
     オブジェクトが画面内か画面外かを判定し，真理値タプルを返す
-    引数 obj：オブジェクト（爆弾，こうかとん，ビーム）SurfaceのRect
+    引数 obj：オブジェクト（爆弾，戦闘機，ビーム）SurfaceのRect
     戻り値：横方向，縦方向のはみ出し判定結果（画面内：True／画面外：False）
     """
     yoko, tate = True, True
@@ -30,7 +30,7 @@ def calc_orientation(org: pg.Rect, dst: pg.Rect) -> tuple[float, float]:
     """
     orgから見て，dstがどこにあるかを計算し，方向ベクトルをタプルで返す
     引数1 org：爆弾SurfaceのRect
-    引数2 dst：こうかとんSurfaceのRect
+    引数2 dst：戦闘機SurfaceのRect
     戻り値：orgから見たdstの方向ベクトルを表すタプル
     """
     x_diff, y_diff = dst.centerx-org.centerx, dst.centery-org.centery
@@ -51,9 +51,9 @@ class Bird(pg.sprite.Sprite):
 
     def __init__(self, num: int, xy: tuple[int, int]):
         """
-        こうかとん画像Surfaceを生成する
-        引数1 num：こうかとん画像ファイル名の番号
-        引数2 xy：こうかとん画像の位置座標タプル
+        画像Surfaceを生成する
+        引数1 num：画像ファイル名の番号
+        引数2 xy：画像の位置座標タプル
         """
         super().__init__()
         img0 = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
@@ -81,8 +81,8 @@ class Bird(pg.sprite.Sprite):
 
     def change_img(self, num: int, screen: pg.Surface):
         """
-        こうかとん画像を切り替え，画面に転送する
-        引数1 num：こうかとん画像ファイル名の番号
+        画像を切り替え，画面に転送する
+        引数1 num：画像ファイル名の番号
         引数2 screen：画面Surface
         """
         self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
@@ -90,7 +90,7 @@ class Bird(pg.sprite.Sprite):
 
     def update(self, key_lst: list[bool], screen: pg.Surface):
         """
-        押下キーに応じてこうかとんを移動させる
+        押下キーに応じて戦闘機を移動させる
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
@@ -132,7 +132,7 @@ class  Atack(pg.sprite.Sprite):
         """
         爆弾Surfaceを生成する
         引数1 emy：爆弾を投下する敵機
-        引数2 bird：攻撃対象のこうかとん
+        引数2 bird：攻撃対象の戦闘機
         """
         saize = [0.25,0.05,0.15]
         super().__init__()
@@ -155,7 +155,7 @@ class  Atack(pg.sprite.Sprite):
             self.kill()
 
 class BossBomb(pg.sprite.Sprite):
-  
+
     """
     爆弾に関するクラス
     """
@@ -165,12 +165,13 @@ class BossBomb(pg.sprite.Sprite):
         """
         爆弾円Surfaceを生成する
         引数1 emy：爆弾を投下する敵機
-        引数2 bird：攻撃対象のこうかとん
+        引数2 bird：攻撃対象の戦闘機
         """
         super().__init__()
         size = 60  # 爆弾円の半径
         color = random.choice(__class__.colors)  # 爆弾円の色：クラス変数からランダム選択
         self.image = pg.Surface((120, 120))
+        self.state = boss
         pg.draw.circle(self.image, color, (size, size), size)
         self.image.set_colorkey((0, 0, 0))
         self.rect = self.image.get_rect()
@@ -196,7 +197,7 @@ class Beam(pg.sprite.Sprite):
     def __init__(self, bird: Bird):
         """
         ビーム画像Surfaceを生成する
-        引数 bird：ビームを放つこうかとん
+        引数 bird：ビームを放つ戦闘機
         """
         super().__init__()
         self.vx, self.vy = bird.get_direction()
@@ -306,7 +307,7 @@ class Nuisance(pg.sprite.Sprite):
     お邪魔ボールに関するクラス
     """
 
-    imgs = [pg.image.load(f"ProjExD_05/fig/nsc_b{i}.png") for i in range(1, 4)]
+    imgs = [pg.image.load(f"ex05/fig/nsc_b{i}.png") for i in range(1, 4)]
 
     def __init__(self, life: int):
         super().__init__()
@@ -344,7 +345,7 @@ class Cure(pg.sprite.Sprite):
     """
     def __init__(self, life: int):
         super().__init__()
-        img = pg.image.load("ProjExd_05/fig/item_cure.png")
+        img = pg.image.load("ex05/fig/item_cure.png")
         self.image = img
         self.rect = self.image.get_rect()
         self.recdct = WIDTH-120, HEIGHT-100
@@ -357,7 +358,7 @@ class Cure(pg.sprite.Sprite):
 
 class Meter:
     """
-    こうかとんの速度を表示するクラス
+    戦闘機の速度を表示するクラス
     """
     def __init__(self):
         self.font = pg.font.Font(None, 50)
@@ -365,7 +366,7 @@ class Meter:
         self.meter = 10
         self.image = self.font.render(f"Speed: {self.meter}", 0, self.color)
         self.rect = self.image.get_rect()
-        self.rect.center = 300, HEIGHT-50
+        self.rect.center = 500, HEIGHT-50
 
     def meter_up(self, add):
         self.meter += add
@@ -401,11 +402,11 @@ class Score:
 
 class Lives:
     """
-    こうかとんの残機表示するクラス
+    戦闘機の残機表示するクラス
     """
     def __init__(self, life_fig)->int:
         self.font = pg.font.Font(None, 50)
-        self.color = (0, 0, 0)
+        self.color = (255, 255, 255)
         self.lives = life_fig
         
         self.lives_text = self.font.render(f"Lives: {self.lives}", 0, self.color)
@@ -423,15 +424,15 @@ class Lives:
 
 class ItemA(pg.sprite.Sprite):
     """
-    ItemAに関するクラス
+    ItemAに関するクラス(未実装)
     """
     def __init__(self):
         super().__init__()
         self.image = pg.image.load("ex05/fig/itemA.png")
         self.rect = self.image.get_rect()
         self.rect.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
-        self.timer = random.randint(10, 15) * 100  # 10秒から15秒後のランダムな時間
-        self.duration = 3 * 50  # 3秒
+        self.timer = random.randint(10000, 15000) * 100  # 10秒から15秒後のランダムな時間
+        self.duration = 1 * 1  # 3秒
         self.active = True
 
     def update(self):
@@ -482,7 +483,7 @@ class ItemB(pg.sprite.Sprite):
 
 #C0A22036/item
 def main():
-    pg.display.set_caption("真！こうかとん無双")
+    pg.display.set_caption("真！戦闘機無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
     shield_img = pg.image.load("ex05/fig/shield.png")
@@ -530,7 +531,6 @@ def main():
         if tmr%250 == 0: # 250フレームに1回,お邪魔ボールを出現させる
             nscs.add(Nuisance(750)) #15秒で消滅
 
-        if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
         if tmr < 500 and tmr%200 == 0:  # 1500フレーム以内かつ200フレームに1回，敵機を出現させる
 
             emys.add(Enemy())
@@ -543,20 +543,19 @@ def main():
                 # 敵機が停止状態に入ったら，intervalに応じて爆弾投下
 
                 atacks.add(Atack(emy, bird))
-                bombs.add(Bomb(emy, bird))
         
         for bossemy in boss:
             if bossemy.state == "stop" and tmr%bossemy.interval == 0:
                 # Bossが停止状態に入ったら，intervalに応じて爆弾投下
-                bombs.add(BossBomb(bossemy, bird))
+                
+                atacks.add(BossBomb(bossemy, bird))
 
         for bossemy in pg.sprite.groupcollide(boss, beams, False, True).keys():
             exps.add(Explosion(bossemy , 100))  # 爆発エフェクト
             if boss_life==0:
                 pg.sprite.groupcollide(boss, beams, True, True).keys()
                 score.score_up(100)  # 100点アップ
-                bird.change_img(6, screen)  # こうかとん喜びエフェクト
-                screen.blit(gameclear,[170,220])
+                screen.blit(gameclear,[240,250])
                 score.update(screen)
                 pg.display.update()
                 time.sleep(2)
@@ -575,17 +574,15 @@ def main():
             bird.speed -= 2 # スピードを2減速
             meter.meter_up(-2)
             if bird.speed == 0: # スピードが0の時にゲームオーバー
-                bird.change_img(8, screen) # こうかとん悲しみエフェクト
                 score.update(screen)
                 meter.update(screen)
                 pg.display.update()
                 time.sleep(2)
                 return
                 
-        if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
-            bird.change_img(8, screen) # こうかとん悲しみエフェクト
-            screen.blit(gameover,[170,220])
+        if len(pg.sprite.spritecollide(bird, atacks, True)) != 0:
 
+            screen.blit(gameover,[260,250])
             score.update(screen)
             life.lives_decrease() # 残機を減らす
             life.update(screen)
@@ -614,7 +611,7 @@ def main():
                 enemy.kill()
 
         # shieldとbombの当たり判定
-        for bomb in bombs:
+        for bomb in atacks:
             if bird.shield_timer > 0 and bird.collides_with_shield(bomb.rect):
                 exps.add(Explosion(bomb, 50))
                 bomb.kill()
@@ -651,8 +648,10 @@ def main():
         boss.update()
         boss.draw(screen)
 
-        bombs.update()
-        bombs.draw(screen)
+        atacks.update()
+
+        atacks .draw(screen)
+
         exps.update()
         exps.draw(screen)
         score.update(screen)
