@@ -77,7 +77,7 @@ class Bird(pg.sprite.Sprite):
 
         self.shield = shield_img
         self.shield_timer = 0  # shieldの発生時間を管理するタイマー
-        self.shield_rect = self.rect.inflate(120, 120).move(-25, -25)  # shieldの当たり判定領域を設定
+        self.shield_rect = self.rect.inflate(60, 60).move(-25, -25)  # shieldの当たり判定領域を設定
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -115,6 +115,7 @@ class Bird(pg.sprite.Sprite):
             shield_rect.center = self.rect.center
             shield_rect.move_ip(5, -10)
             screen.blit(self.shield, shield_rect)
+            self.shield_rect = shield_rect
             self.shield_timer -= 1
 
     def get_direction(self) -> tuple[int, int]:
